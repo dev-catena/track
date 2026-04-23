@@ -190,9 +190,16 @@ export const api = {
     return data;
   },
 
-  async listOperators(token) {
+  async listOperators(token, organizationId) {
+    let url = `${BASE_URL}/api/admin/operators`;
+    if (organizationId != null && organizationId !== '') {
+      const id = typeof organizationId === 'number' ? organizationId : parseInt(String(organizationId), 10);
+      if (Number.isFinite(id)) {
+        url += `?organization_id=${id}`;
+      }
+    }
     const res = await fetchWithTimeout(
-      `${BASE_URL}/api/admin/operators`,
+      url,
       { headers: getHeaders(token) },
       TIMEOUT_LIST_MS
     );
@@ -206,13 +213,19 @@ export const api = {
     return data.data?.operators || [];
   },
 
-  async registerOperatorFace(token, operatorId, imageUri) {
+  async registerOperatorFace(token, operatorId, imageUri, organizationId) {
     const formData = new FormData();
     formData.append('image', {
       uri: imageUri,
       type: 'image/jpeg',
       name: 'image.jpg',
     });
+    if (organizationId != null && organizationId !== '') {
+      const oid = typeof organizationId === 'number' ? organizationId : parseInt(String(organizationId), 10);
+      if (Number.isFinite(oid)) {
+        formData.append('organization_id', String(oid));
+      }
+    }
 
     const res = await fetchWithTimeout(
       `${BASE_URL}/api/admin/operators/${operatorId}/face-register`,

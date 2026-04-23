@@ -50,6 +50,8 @@ return [
         'banco_imagens' => env('THALAMUS_FACE_BANCO_IMAGENS', 'thalamus'),
         'id_prefix' => env('THALAMUS_FACE_ID_PREFIX', 'track'),
         'recognize_path' => env('THALAMUS_FACE_RECOGNIZE_PATH', '/face/api/recognize/image'),
+        /** Reconhecimento: mesmo contrato do app Flutter (Thalamus). */
+        'user_agent' => env('THALAMUS_FACE_USER_AGENT', 'Flutter-App/1.0'),
         /** octet_stream: corpo binário (image/jpeg). multipart: campo multipart (THALAMUS_FACE_RECOGNIZE_FIELD). */
         'recognize_mode' => env('THALAMUS_FACE_RECOGNIZE_MODE', 'octet_stream'),
         'recognize_multipart_field' => env('THALAMUS_FACE_RECOGNIZE_FIELD', 'image'),

@@ -2,7 +2,9 @@
 
 use App\Models\Operator;
 use App\Models\Organization;
+use App\Services\MqttService;
 use App\Services\ThalamusFaceService;
+use App\Models\MqttTopic;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -61,4 +63,48 @@ Artisan::command('track:face-diagnose {--name= : Parte do nome do operador (ex. 
 
     return 0;
 })->purpose('Diagnóstico rápido: Thalamus .env e face_id dos operadores');
+
+Artisan::command('track:mqtt-test {--topic= : Nome exato do tópico (mqtt_topics.name) — senão usa o primeiro ativo}', function () {
+    $host = (string) config('mqtt.host');
+    $port = (int) config('mqtt.port');
+    $timeout = (int) config('mqtt.connect_timeout', 15);
+    $this->info("Config carregada: host={$host} port={$port} connect_timeout={$timeout}s");
+    $this->line('O checkout usa exatamente este host. Se o terminal "nc" OK e aqui falhar, PHP pode estar outro contexto (Docker/WSL) ou .env desatualizado (rode config:clear).');
+    $this->newLine();
+
+    $t0 = microtime(true);
+    $fp = @fsockopen($host, $port, $errno, $errstr, $timeout);
+    $elapsed = round(microtime(true) - $t0, 2);
+    if ($fp === false) {
+        $this->error("fsockopen falhou em {$elapsed}s: [{$errno}] {$errstr}");
+        $this->warn('Erro 113/110: MQTT_HOST no .env deve ser o broker alcançável a partir de ONDE RODA O PHP. Depois: php artisan config:clear');
+
+        return 1;
+    }
+    fclose($fp);
+    $this->info("TCP chegou ao broker em {$elapsed}s.");
+    $this->newLine();
+
+    $name = (string) ($this->option('topic') ?? '');
+    if ($name === '') {
+        $name = (string) MqttTopic::query()->where('is_active', true)->orderBy('id')->value('name');
+        if ($name === '') {
+            $this->warn('Nenhum tópico ativo. Passe --topic=nome_da_doca.');
+
+            return 0;
+        }
+        $this->line("Usando primeiro tópico ativo: {$name}");
+    }
+
+    $mqtt = app(MqttService::class);
+    $ok = $mqtt->sendCommand($name, 'slot_status', ['diagnostic' => 1]);
+    if ($ok) {
+        $this->info("sendCommand ok para tópico: {$name}");
+
+        return 0;
+    }
+    $this->error('sendCommand falhou: '.($mqtt->getLastError() ?? '(sem detalhe)'));
+
+    return 1;
+})->purpose('Testa rota TCP e publish MQTT no mesmo processo/ rede do Laravel (diagnóstico erro 110/113)');
 

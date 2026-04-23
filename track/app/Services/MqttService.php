@@ -4,10 +4,51 @@ namespace App\Services;
 
 use App\Models\MqttTopic;
 use Illuminate\Support\Facades\Log;
+use PhpMqtt\Client\ConnectionSettings;
 use PhpMqtt\Client\MqttClient;
 
 class MqttService
 {
+    private ?string $lastError = null;
+
+    public function getLastError(): ?string
+    {
+        return $this->lastError;
+    }
+
+    private function clearLastError(): void
+    {
+        $this->lastError = null;
+    }
+
+    /**
+     * Ajustes de conexão (incl. usuário/senha do .env, antes ignorados no connect()).
+     */
+    private function connectionSettings(): ConnectionSettings
+    {
+        $timeout = (int) config('mqtt.connect_timeout', 10);
+        $s = (new ConnectionSettings)
+            ->setConnectTimeout($timeout);
+
+        $user = (string) config('mqtt.username', '');
+        if ($user !== '') {
+            $s = $s
+                ->setUsername($user)
+                ->setPassword((string) config('mqtt.password', ''));
+        }
+
+        return $s;
+    }
+
+    private function newClient(string $idSuffix): MqttClient
+    {
+        return new MqttClient(
+            (string) config('mqtt.host'),
+            (int) config('mqtt.port'),
+            (string) config('mqtt.client_id') . $idSuffix
+        );
+    }
+
     /**
      * Envia comando MQTT para o tópico (formato: {topic}/cmd).
      * Payload: {"command":"open"|"close", "slot": 1-6 (opcional)}
@@ -16,25 +57,24 @@ class MqttService
      */
     public function sendCommand(string $topicName, string $command, array $extra = []): bool
     {
+        $this->clearLastError();
+
         $topic = MqttTopic::where('name', $topicName)->where('is_active', true)->first();
 
-        if (!$topic) {
+        if (! $topic) {
+            $this->lastError = 'Tópico MQTT não cadastrado ou inativo: '.$topicName;
             Log::warning('MqttService: Tópico não encontrado ou inativo', ['topic' => $topicName]);
+
             return false;
         }
 
         try {
-            $client = new MqttClient(
-                config('mqtt.host'),
-                config('mqtt.port'),
-                config('mqtt.client_id') . '_' . time()
-            );
-
-            $client->connect();
+            $client = $this->newClient('_'.time());
+            $client->connect($this->connectionSettings(), false);
 
             $payload = array_merge(['command' => $command], $extra);
             $payload = json_encode($payload);
-            $commandTopic = $topicName . '/cmd';
+            $commandTopic = $topicName.'/cmd';
 
             $client->publish($commandTopic, $payload, 0);
             $client->disconnect();
@@ -46,11 +86,13 @@ class MqttService
 
             return true;
         } catch (\Exception $e) {
+            $this->lastError = $e->getMessage();
             Log::error('MqttService: Erro ao enviar comando', [
                 'topic' => $topicName,
                 'command' => $command,
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -71,23 +113,22 @@ class MqttService
      */
     public function publishOta(string $topicName, array $payload): bool
     {
+        $this->clearLastError();
+
         $topic = MqttTopic::where('name', $topicName)->where('is_active', true)->first();
 
-        if (!$topic) {
+        if (! $topic) {
+            $this->lastError = 'Tópico MQTT não cadastrado ou inativo: '.$topicName;
             Log::warning('MqttService: Tópico não encontrado ou inativo', ['topic' => $topicName]);
+
             return false;
         }
 
         try {
-            $client = new MqttClient(
-                config('mqtt.host'),
-                config('mqtt.port'),
-                config('mqtt.client_id') . '_ota_' . time()
-            );
+            $client = $this->newClient('_ota_'.time());
+            $client->connect($this->connectionSettings(), false);
 
-            $client->connect();
-
-            $otaTopic = $topicName . '/ota';
+            $otaTopic = $topicName.'/ota';
             $json = json_encode($payload);
             $client->publish($otaTopic, $json, 0);
             $client->disconnect();
@@ -96,10 +137,12 @@ class MqttService
 
             return true;
         } catch (\Exception $e) {
+            $this->lastError = $e->getMessage();
             Log::error('MqttService: Erro ao publicar OTA', [
                 'topic' => $topicName,
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }

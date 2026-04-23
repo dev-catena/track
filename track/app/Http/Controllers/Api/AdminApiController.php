@@ -32,8 +32,18 @@ class AdminApiController extends Controller
         }
 
         $orgId = $user->organization_id ?? null;
-        if (!$orgId) {
-            return $this->sendJsonResponse(1, 'Operadores listados.', ['operators' => []]);
+        // Superadmin (sem unidade) usa organization_id da query, como no painel (filtro de empresa).
+        if (! $orgId && $user->role === 'superadmin' && $request->filled('organization_id')) {
+            $request->validate(['organization_id' => 'required|integer|exists:organizations,id']);
+            $orgId = (int) $request->organization_id;
+        }
+
+        if (! $orgId) {
+            return $this->sendJsonResponse(
+                0,
+                'Nenhuma unidade selecionada. No app, faça login com superadmin e escolha a unidade; ou use um admin vinculado a uma organização. No painel, contas superadmin não aparecem em Usuários (lista só a unidade).',
+                null
+            );
         }
 
         $operators = Operator::select('id', 'name', 'username', 'email', 'face_id', 'organization_id', 'department_id')
@@ -76,7 +86,12 @@ class AdminApiController extends Controller
 
             $operator = $this->operator->find($id);
 
-            if ($user->organization_id && $operator->organization_id != $user->organization_id) {
+            if ($user->role === 'superadmin' && ! $user->organization_id) {
+                $request->validate(['organization_id' => 'required|integer|exists:organizations,id']);
+                if ((int) $operator->organization_id !== (int) $request->input('organization_id')) {
+                    return $this->sendJsonResponse(0, 'Operador não pertence à unidade indicada (organization_id).');
+                }
+            } elseif ($user->organization_id && (int) $operator->organization_id !== (int) $user->organization_id) {
                 return $this->sendJsonResponse(0, 'Operador não pertence à sua organização.');
             }
 
@@ -125,7 +140,8 @@ class AdminApiController extends Controller
 
             $targetUser = User::findOrFail($id);
 
-            if ($targetUser->organization_id != $user->organization_id) {
+            $isSuperUnbound = $user->role === 'superadmin' && ! $user->organization_id;
+            if (! $isSuperUnbound && (int) $targetUser->organization_id !== (int) $user->organization_id) {
                 return $this->sendJsonResponse(0, 'Usuário não pertence à sua organização.');
             }
             if (!in_array($targetUser->role, ['admin', 'manager'])) {

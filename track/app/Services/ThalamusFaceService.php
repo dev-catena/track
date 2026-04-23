@@ -119,14 +119,30 @@ class ThalamusFaceService
     }
 
     /**
-     * Reconhecimento facial: POST /face/api/recognize/image
+     * Headers comuns do POST de reconhecimento (alinhado ao cliente Flutter / Thalamus).
+     * URL: {THALAMUS_FACE_BASE_URL}/face/api/recognize/image (padrão em recognize_path).
+     */
+    private function recognizeHttpHeaders(): array
+    {
+        $banco = (string) config('services.thalamus_face.banco_imagens', 'thalamus');
+        $ua = (string) config('services.thalamus_face.user_agent', 'Flutter-App/1.0');
+
+        return [
+            'banco-imagens' => $banco,
+            'User-Agent' => $ua,
+            'Connection' => 'keep-alive',
+            'Accept-Encoding' => 'identity',
+        ];
+    }
+
+    /**
+     * Reconhecimento facial: POST {base}{recognize_path} (ex.: /face/api/recognize/image)
      *
      * @return array{ok: bool, face_id: ?string, message: string, status?: int, body?: mixed}
      */
     public function recognizeFromImage(string $imagePath): array
     {
         $base = rtrim((string) config('services.thalamus_face.base_url'), '/');
-        $banco = (string) config('services.thalamus_face.banco_imagens', 'thalamus');
 
         if ($base === '') {
             return ['ok' => false, 'face_id' => null, 'message' => 'Thalamus Face API não configurada (THALAMUS_FACE_BASE_URL).'];
@@ -140,6 +156,7 @@ class ThalamusFaceService
         $path = str_starts_with($path, '/') ? $path : '/' . $path;
         $url = $base . $path;
         $mode = strtolower((string) config('services.thalamus_face.recognize_mode', 'octet_stream'));
+        $recognizeHeaders = $this->recognizeHttpHeaders();
 
         try {
             if ($mode === 'multipart') {
@@ -147,7 +164,7 @@ class ThalamusFaceService
                 $mime = $this->guessMime($imagePath);
                 $response = Http::connectTimeout(15)
                     ->timeout(60)
-                    ->withHeaders(['banco-imagens' => $banco])
+                    ->withHeaders($recognizeHeaders)
                     ->attach($field, file_get_contents($imagePath), basename($imagePath), ['Content-Type' => $mime])
                     ->post($url);
             } else {
@@ -155,10 +172,9 @@ class ThalamusFaceService
                 $bytes = file_get_contents($imagePath);
                 $response = Http::connectTimeout(15)
                     ->timeout(60)
-                    ->withHeaders([
+                    ->withHeaders(array_merge($recognizeHeaders, [
                         'Content-Type' => $mime,
-                        'banco-imagens' => $banco,
-                    ])
+                    ]))
                     ->withBody($bytes !== false ? $bytes : '', $mime)
                     ->post($url);
             }

@@ -15,7 +15,7 @@ import { api } from '../services/api';
 import { colors } from '../theme/colors';
 
 export default function FaceRegisterScreen({ navigation }) {
-  const { token } = useAuth();
+  const { token, user, effectiveOrganizationId } = useAuth();
   const [operators, setOperators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -26,11 +26,15 @@ export default function FaceRegisterScreen({ navigation }) {
 
   useEffect(() => {
     loadOperators();
-  }, [token]);
+  }, [token, effectiveOrganizationId]);
 
   const loadOperators = async () => {
     try {
-      const list = await api.listOperators(token);
+      if (!effectiveOrganizationId) {
+        setOperators([]);
+        return;
+      }
+      const list = await api.listOperators(token, effectiveOrganizationId);
       setOperators(list || []);
     } catch (e) {
       Alert.alert('Erro', e.message || 'Falha ao carregar usuários');
@@ -66,7 +70,16 @@ export default function FaceRegisterScreen({ navigation }) {
       if (isUser) {
         await api.registerUserFace(token, selectedOperator.id, photo.uri);
       } else {
-        await api.registerOperatorFace(token, selectedOperator.id, photo.uri);
+        const scope =
+          !user?.organization_id && user?.role === 'superadmin'
+            ? effectiveOrganizationId
+            : null;
+        await api.registerOperatorFace(
+          token,
+          selectedOperator.id,
+          photo.uri,
+          scope,
+        );
       }
       Alert.alert('Sucesso', `Rosto de ${selectedOperator.name} registrado!`);
       setSelectedOperator(null);
@@ -86,6 +99,20 @@ export default function FaceRegisterScreen({ navigation }) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (!effectiveOrganizationId) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.message}>
+          Nenhuma unidade ativa. Superadmin: escolha a unidade na tela inicial. Outros: o usuário precisa estar
+          vinculado a uma organização.
+        </Text>
+        <TouchableOpacity style={styles.btn} onPress={() => navigation.goBack()}>
+          <Text style={styles.btnText}>Voltar</Text>
+        </TouchableOpacity>
       </View>
     );
   }

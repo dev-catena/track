@@ -15,17 +15,19 @@ import { api } from '../services/api';
 import { colors } from '../theme/colors';
 
 export default function SetupDockScreen({ navigation }) {
-  const { user } = useAuth();
+  const { user, effectiveOrganizationId } = useAuth();
   const { setDock } = useDock();
   const [docks, setDocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const departmentId = user?.department_id;
-  const organizationId = user?.organization_id;
+  const departmentId = user?.role === 'superadmin' && !user?.organization_id
+    ? null
+    : user?.department_id;
+  const organizationId = effectiveOrganizationId;
 
   const loadDocks = async () => {
-    if (!departmentId && !organizationId) {
+    if (!organizationId && !departmentId) {
       setLoading(false);
       return;
     }
@@ -43,7 +45,7 @@ export default function SetupDockScreen({ navigation }) {
 
   useEffect(() => {
     loadDocks();
-  }, [departmentId, organizationId]);
+  }, [departmentId, organizationId, effectiveOrganizationId]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -66,10 +68,13 @@ export default function SetupDockScreen({ navigation }) {
     }
   };
 
-  if (!departmentId && !organizationId) {
+  if (!organizationId && !departmentId) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.message}>Seu usuário não tem departamento/empresa associado.</Text>
+        <Text style={styles.message}>
+          Nenhuma unidade selecionada. Se você é superadmin, escolha a unidade no início (Admin) ou refaça o
+          login.
+        </Text>
         <TouchableOpacity style={styles.btn} onPress={() => navigation.goBack()}>
           <Text style={styles.btnText}>Voltar</Text>
         </TouchableOpacity>

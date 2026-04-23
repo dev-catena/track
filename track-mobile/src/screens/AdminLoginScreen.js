@@ -31,7 +31,12 @@ export default function AdminLoginScreen({ navigation }) {
     try {
       const res = await api.adminLogin(username.trim(), password);
       if (res.status === 1 && res.data) {
-        await login(res.data.token, res.data.user, 'admin');
+        const { token, user, organizations = [] } = res.data;
+        await login(
+          token,
+          { ...user, organizations },
+          'admin',
+        );
         // Não usar navigation.reset - ao trocar token/userType, o RootNavigator
         // substitui AuthStack por AdminStack, que já inicia em AdminHome
       } else {

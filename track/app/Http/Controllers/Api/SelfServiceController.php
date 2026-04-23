@@ -135,10 +135,18 @@ class SelfServiceController extends Controller
         }
 
         $mqtt = app(MqttService::class);
-        if (!$mqtt->sendCommand($topicName, $command, $extra)) {
+        if (! $mqtt->sendCommand($topicName, $command, $extra)) {
+            $hint = $mqtt->getLastError();
+            $msg = 'Falha ao enviar comando MQTT (checkout).';
+            if ($hint) {
+                $msg .= ' '.$hint;
+            } else {
+                $msg .= ' Verifique no servidor: MQTT_HOST, MQTT_PORT, MQTT_BROKER_USERNAME/PASSWORD e se o tópico da doca está ativo no banco.';
+            }
+
             return response()->json([
                 'success' => false,
-                'message' => 'Falha ao enviar comando.',
+                'message' => $msg,
             ], 500);
         }
 
@@ -208,10 +216,16 @@ class SelfServiceController extends Controller
         }
 
         $mqtt = app(MqttService::class);
-        if (!$mqtt->sendCommand($dock->mqttTopic->name, 'close', $extra)) {
+        if (! $mqtt->sendCommand($dock->mqttTopic->name, 'close', $extra)) {
+            $hint = $mqtt->getLastError();
+            $msg = 'Falha ao enviar comando MQTT (fechar).';
+            if ($hint) {
+                $msg .= ' '.$hint;
+            }
+
             return response()->json([
                 'success' => false,
-                'message' => 'Falha ao enviar comando.',
+                'message' => $msg,
             ], 500);
         }
 

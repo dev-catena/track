@@ -303,12 +303,25 @@ class AuthApiController extends Controller
                     ? (string) Organization::where('id', $user->organization_id)->value('name')
                     : '');
 
+            $userPayload = array_merge(
+                $user->only(['id', 'name', 'email', 'username', 'role', 'organization_id', 'department_id']),
+                ['organization_name' => $tabletOrgName]
+            );
+
+            // No tablet, superadmin não tem organization_id: precisa listar unidades (mesma ideia do painel web).
+            $organizations = [];
+            if ($user->role === 'superadmin') {
+                $organizations = Organization::orderBy('name')
+                    ->get(['id', 'name'])
+                    ->map(fn ($o) => ['id' => (int) $o->id, 'name' => (string) $o->name])
+                    ->values()
+                    ->all();
+            }
+
             $data = [
                 'token' => $token,
-                'user' => array_merge(
-                    $user->only(['id', 'name', 'email', 'username', 'role', 'organization_id', 'department_id']),
-                    ['organization_name' => $tabletOrgName]
-                ),
+                'user' => $userPayload,
+                'organizations' => $organizations,
             ];
 
             return $this->sendJsonResponse(1, 'Login realizado.', $data);

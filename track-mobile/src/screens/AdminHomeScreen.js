@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,8 +14,33 @@ import { colors } from '../theme/colors';
 
 export default function AdminHomeScreen({ navigation }) {
   const insets = useSafeAreaInsets();
-  const { user, logout } = useAuth();
+  const {
+    user,
+    logout,
+    organizations = [],
+    effectiveOrganizationId,
+    setTabletScopeOrganization,
+  } = useAuth();
   const { dock } = useDock();
+
+  const currentOrgName = useMemo(() => {
+    if (user?.organization_id) {
+      return user.organization_name || 'Organização';
+    }
+    const o = organizations.find((x) => Number(x.id) === Number(effectiveOrganizationId));
+    return o?.name || (organizations[0]?.name ?? 'Unidade');
+  }, [user, organizations, effectiveOrganizationId]);
+
+  const showOrgPicker = () => {
+    if (user?.role !== 'superadmin' || user?.organization_id) return;
+    if (organizations.length < 2) return;
+    const buttons = organizations.map((o) => ({
+      text: o.name,
+      onPress: () => setTabletScopeOrganization(o.id),
+    }));
+    buttons.push({ text: 'Cancelar', style: 'cancel' });
+    Alert.alert('Unidade do tablet', 'Qual unidade deseja usar agora?', buttons);
+  };
 
   const handleLogout = () => {
     Alert.alert('Sair', 'Deseja sair?', [
@@ -28,9 +53,20 @@ export default function AdminHomeScreen({ navigation }) {
     <ScrollView style={styles.container}>
       <View style={[styles.header, { paddingTop: Math.max(insets.top, 16) + 12 }]}>
         <View style={styles.headerLeft}>
-          {!!user?.organization_name && (
-            <Text style={styles.companyName}>{user.organization_name}</Text>
-          )}
+          {!!(user?.organization_id || organizations.length) &&
+            (user?.role === 'superadmin' &&
+            !user?.organization_id &&
+            organizations.length > 1 ? (
+              <TouchableOpacity onPress={showOrgPicker}>
+                <Text style={styles.companyName} numberOfLines={2}>
+                  {currentOrgName} · trocar
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <Text style={styles.companyName} numberOfLines={2}>
+                {currentOrgName}
+              </Text>
+            ))}
           <Text style={styles.greeting}>Admin: {user?.name}</Text>
         </View>
         <TouchableOpacity onPress={handleLogout}>
