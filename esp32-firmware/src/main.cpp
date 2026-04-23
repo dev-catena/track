@@ -18,6 +18,7 @@
 #include <MD5Builder.h>
 #include <esp_ota_ops.h>
 #include <time.h>
+#include "ble_provisioning.h"
 
 // ====== CONFIGURAÇÕES FIXAS ======
 #define AP_SSID "IOT-Zontec"
@@ -120,6 +121,13 @@ bool connectMQTT();
 void handleRoot();
 void handleDeviceInfo();
 void handleConfigure();
+struct NetworkConfigApplyResult {
+    int httpCode;
+    String body;
+    bool wantRestart;
+};
+void applyNetworkConfigFromJson(const String& body, NetworkConfigApplyResult& out);
+void bleApplyFromBle(const char* json);
 void startAPMode();
 void processOtaCommand(String message);
 void processOtaUpdate();
@@ -324,10 +332,23 @@ void setup() {
     
     // Carregar configurações da EEPROM
     loadFromEEPROM();
-    
+    {
+        String bleName = "IOT-";
+        String m = deviceMAC;
+        m.replace(":", "");
+        if (m.length() >= 4) {
+            bleName += m.substring((int)m.length() - 4);
+        } else {
+            bleName += "ZONT";
+        }
+        bleProvisioningInit(bleName.c_str(), bleApplyFromBle);
+        Serial.printf("📶 BLE provisionamento (mesmo JSON do /configure). Nome: %s — opção extra ao portal 192.168.4.1\n", bleName.c_str());
+    }
+    Serial.println("ℹ️ BOOT/IO0: segure 5s+ e solte → modo AP; segure 10s+ (pode manter) → apaga WiFi/servidor e reinicia em AP");
+
     // Verificar botão pressionado no boot
     if (digitalRead(BUTTON_PIN) == LOW) {
-        Serial.println("🔄 Botão pressionado no boot - Modo AP forçado");
+        Serial.println("🔄 Botão pressionado no boot - Modo AP forçado (WiFi salvo não será conectado neste boot)");
         button5sTriggered = true;
     }
     
@@ -420,6 +441,8 @@ void loop() {
     
     // Verificar botão
     handleButton();
+
+    bleProvisioningPoll();
     
     delay(10);
 }
@@ -468,27 +491,44 @@ void updateLeds() {
 }
 
 // ====== FUNÇÕES DE BOTÃO ======
+static void eepromFactoryResetAndRestart() {
+    clearEEPROM();
+    // RAM pode ainda ter IP antigo até o reboot; o próximo setup() recarrega EEPROM zerada
+    savedSSID = "";
+    savedPassword = "";
+    savedServerIP = DEFAULT_SERVER_IP;
+    button10sTriggered = true;
+    delay(200);
+    ESP.restart();
+}
+
 void handleButton() {
     bool currentButtonState = (digitalRead(BUTTON_PIN) == LOW);
-    
-    if (currentButtonState && !buttonPressed) {
-        buttonPressed = true;
-        buttonPressStart = millis();
-        Serial.println("🔘 Botão pressionado");
-        
-    } else if (!currentButtonState && buttonPressed) {
+    unsigned long now = millis();
+
+    if (currentButtonState) {
+        if (!buttonPressed) {
+            buttonPressed = true;
+            buttonPressStart = now;
+            Serial.println("🔘 Botão pressionado (10s+ segurando = reset EEPROM+reboot; 5s+ soltar = AP)");
+        } else if (!button10sTriggered) {
+            // Não exige soltar: após 10s contínuos já limpa (o fluxo “só na soltura” falhava p/ muita gente)
+            unsigned long held = now - buttonPressStart;
+            if (held >= 10000) {
+                Serial.println("🗑️ 10s+ segurando — Limpando EEPROM e reiniciando no modo configuração (AP)...");
+                eepromFactoryResetAndRestart();
+            }
+        }
+    } else if (buttonPressed) {
         buttonPressed = false;
-        unsigned long pressDuration = millis() - buttonPressStart;
+        unsigned long pressDuration = now - buttonPressStart;
         Serial.printf("🔘 Botão liberado após %lu ms\n", pressDuration);
-        
+
         if (pressDuration >= 10000 && !button10sTriggered) {
-            Serial.println("🗑️ Botão 10s - Limpando EEPROM...");
-            clearEEPROM();
-            button10sTriggered = true;
-            ESP.restart();
-            
+            Serial.println("🗑️ 10s+ (ao soltar) — Limpando EEPROM e reiniciando...");
+            eepromFactoryResetAndRestart();
         } else if (pressDuration >= 5000 && !button5sTriggered) {
-            Serial.println("📡 Botão 5s - Modo AP forçado...");
+            Serial.println("📡 Botão 5s+ (ao soltar) — Modo AP forçado...");
             button5sTriggered = true;
             startAPMode();
         }
@@ -976,56 +1016,80 @@ void handleDeviceInfo() {
     server.send(200, "application/json", response);
 }
 
+void applyNetworkConfigFromJson(const String& body, NetworkConfigApplyResult& out) {
+    out.httpCode = 400;
+    out.body = "{\"success\":false,\"message\":\"JSON inválido\"}";
+    out.wantRestart = false;
+
+    DynamicJsonDocument doc(512);
+    if (deserializeJson(doc, body) != DeserializationError::Ok) {
+        return;
+    }
+
+    String ssid = doc["ssid"].as<String>();
+    String password = doc["password"].as<String>();
+    String serverIp = doc["server_ip"].as<String>();
+    if (serverIp.length() == 0) {
+        serverIp = DEFAULT_SERVER_IP;
+    }
+
+    Serial.printf("🔧 Configurando WiFi: %s\n", ssid.c_str());
+    Serial.printf("🖥️ IP do servidor: %s\n", serverIp.c_str());
+    Serial.println("🔄 Testando conexão WiFi...");
+
+    if (connectToWiFi(ssid, password)) {
+        Serial.println("✅ WiFi conectado com sucesso!");
+        Serial.println("💾 Salvando configurações na EEPROM...");
+        saveToEEPROM(ssid, password, deviceMAC, mqttTopic);
+        saveServerIPToEEPROM(serverIp);
+
+        Serial.println("📡 Iniciando registro no backend...");
+        bool registroOk = registerInBackend();
+
+        out.httpCode = 200;
+        out.wantRestart = true;
+        if (registroOk) {
+            Serial.println("✅ Registro no backend realizado com sucesso!");
+            out.body = "{\"success\":true,\"message\":\"Dispositivo configurado e registrado com sucesso! Reiniciando...\"}";
+        } else {
+            Serial.println("⚠️ WiFi OK mas falha no registro do backend");
+            out.body = "{\"success\":true,\"message\":\"WiFi conectado mas erro no registro. Reiniciando...\"}";
+        }
+    } else {
+        Serial.println("❌ Falha ao conectar WiFi!");
+        out.httpCode = 400;
+        out.body = "{\"success\":false,\"message\":\"Falha ao conectar WiFi. Verifique SSID e senha.\"}";
+    }
+}
+
 void handleConfigure() {
     if (server.method() != HTTP_POST) {
         server.send(405, "application/json", "{\"success\":false,\"message\":\"Method not allowed\"}");
         return;
     }
-    
-    String body = server.arg("plain");
-    DynamicJsonDocument doc(512);
-    
-    if (deserializeJson(doc, body) != DeserializationError::Ok) {
-        server.send(400, "application/json", "{\"success\":false,\"message\":\"JSON inválido\"}");
-        return;
-    }
-    
-    String ssid = doc["ssid"];
-    String password = doc["password"];
-    String serverIp = doc["server_ip"].as<String>();
-    if (serverIp.length() == 0) serverIp = DEFAULT_SERVER_IP;
 
-    Serial.printf("🔧 Configurando WiFi: %s\n", ssid.c_str());
-    Serial.printf("🖥️ IP do servidor: %s\n", serverIp.c_str());
-    Serial.println("🔄 Testando conexão WiFi...");
-    
-    // Testar conexão WiFi
-    if (connectToWiFi(ssid, password)) {
-        Serial.println("✅ WiFi conectado com sucesso!");
-        
-        // Salvar na EEPROM
-        Serial.println("💾 Salvando configurações na EEPROM...");
-        saveToEEPROM(ssid, password, deviceMAC, mqttTopic);
-        saveServerIPToEEPROM(serverIp);
-        
-        // Registrar no backend
-        Serial.println("📡 Iniciando registro no backend...");
-        bool registroOk = registerInBackend();
-        
-        if (registroOk) {
-            Serial.println("✅ Registro no backend realizado com sucesso!");
-            server.send(200, "application/json", "{\"success\":true,\"message\":\"Dispositivo configurado e registrado com sucesso! Reiniciando...\"}");
-        } else {
-            Serial.println("⚠️ WiFi OK mas falha no registro do backend");
-            server.send(200, "application/json", "{\"success\":true,\"message\":\"WiFi conectado mas erro no registro. Reiniciando...\"}");
-        }
-        
+    String body = server.arg("plain");
+    NetworkConfigApplyResult r;
+    applyNetworkConfigFromJson(body, r);
+    server.send(r.httpCode, "application/json", r.body);
+    if (r.wantRestart) {
         delay(3000);
         ESP.restart();
-        
-    } else {
-        Serial.println("❌ Falha ao conectar WiFi!");
-        server.send(400, "application/json", "{\"success\":false,\"message\":\"Falha ao conectar WiFi. Verifique SSID e senha.\"}");
+    }
+}
+
+void bleApplyFromBle(const char* json) {
+    if (json == nullptr) {
+        return;
+    }
+    bleProvisioningSetStatus(
+        R"({"message":"Aplicando. Aguarde 15–30s (teste de WiFi e registro).","success":true})");
+    NetworkConfigApplyResult r;
+    applyNetworkConfigFromJson(String(json), r);
+    bleProvisioningSetStatus(r.body.c_str());
+    if (r.wantRestart) {
+        delay(2000);
+        ESP.restart();
     }
 }
 

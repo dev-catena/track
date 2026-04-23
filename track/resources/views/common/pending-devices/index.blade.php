@@ -44,6 +44,9 @@
                     <p class="text-muted mb-3">
                         O ESP32 é a doca. Ao registrar o ESP32 na rede, você está registrando a doca. Docas pendentes aguardam ativação (empresa/departamento) e depois aparecem em <strong>Gestão de Docas</strong>. (Tablets são cadastrados separadamente em Gestão de Dispositivos.)
                     </p>
+                    <p class="text-muted small">
+                        <strong>Lista vazia:</strong> se a doca já foi ativada antes, ela <strong>não</strong> fica aqui; veja <strong>Gestão de Docas</strong> ({{ url(request()->segment(1) . '/dock/management') }}). Só entram pendentes com status &quot;Pendente&quot; no banco.
+                    </p>
                     <div class="alert alert-info mb-3">
                         <strong>Doca já ativada não aparece aqui.</strong> Se o ESP32 retorna "Doca online" (deployed), ele já foi ativado antes.
                         Para reaparecer e poder registrar de novo: use <strong>Reverter para pendente</strong> com o MAC da doca (ex: B0:CB:D8:8B:80:BC).

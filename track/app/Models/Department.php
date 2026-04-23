@@ -10,6 +10,7 @@ use App\Models\Dock;
 use App\Models\Device;
 use Carbon\Carbon;
 use App\Helpers\SystemConfigHelper;
+use Illuminate\Support\Collection;
 
 class Department extends Model
 {
@@ -69,5 +70,50 @@ class Department extends Model
     public function devices()
     {
         return $this->hasManyThrough(Device::class, Dock::class);
+    }
+
+    /**
+     * Departamentos ativos em ordem de árvore (pré-ordem) para <select> / JSON, com rótulo indentado.
+     *
+     * @return Collection<int, array{id:int, name:string, depth:int}>
+     */
+    public static function forSelectHierarchical(int $organizationId): Collection
+    {
+        $all = self::query()
+            ->where('organization_id', $organizationId)
+            ->where('status', 'active')
+            ->get(['id', 'name', 'parent_id']);
+        if ($all->isEmpty()) {
+            return collect();
+        }
+
+        $byParent = $all->whereNotNull('parent_id')->groupBy('parent_id');
+        $out = collect();
+        $visit = function ($dept, int $depth) use (&$visit, $byParent, &$out) {
+            $indent = $depth > 0 ? str_repeat('  ', $depth) : '';
+            $label = $indent . ($depth > 0 ? '↳ ' : '') . $dept->name;
+            $out->push([
+                'id' => (int) $dept->id,
+                'name' => $label,
+                'depth' => $depth,
+            ]);
+            $children = $byParent->get($dept->id, collect())->sortBy('name', SORT_NATURAL);
+            foreach ($children as $child) {
+                $visit($child, $depth + 1);
+            }
+        };
+
+        foreach ($all->whereNull('parent_id')->sortBy('name', SORT_NATURAL) as $root) {
+            $visit($root, 0);
+        }
+
+        $used = $out->pluck('id')->all();
+        foreach ($all as $d) {
+            if (!in_array($d->id, $used, true)) {
+                $visit($d, 0);
+            }
+        }
+
+        return $out;
     }
 }

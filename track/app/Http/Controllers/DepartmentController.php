@@ -210,15 +210,14 @@ class DepartmentController extends Controller
         return $this->sendJsonResponse(1,'Department deleted successfully.');
     }
 
-    // List departments by company ID
+    // List departments by company ID (ordem em árvore + rótulo indentado para selects)
     public function department_list_by_company($id) {
 
-        $departments = $this->department->departmentsByCompanyId($id);
+        $departments = Department::forSelectHierarchical((int) $id);
 
-        if(count($departments) > 0) {
-            return $this->sendJsonResponse(1,'Department list retrieved successfully.',$departments);
-        } else {
-            return $this->sendJsonResponse(0,'No data found!');
+        if ($departments->isNotEmpty()) {
+            return $this->sendJsonResponse(1, 'Department list retrieved successfully.', $departments->values()->all());
         }
+        return $this->sendJsonResponse(0, 'No data found!');
     }
 }

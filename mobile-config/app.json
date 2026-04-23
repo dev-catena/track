@@ -1,0 +1,17 @@
+{
+  "name": "IotZontecConfig",
+  "displayName": "IotZontecConfig",
+  "expo": {
+    "name": "IotZontecConfig",
+    "slug": "iot-zontec-config",
+    "version": "0.0.1",
+    "android": {
+      "package": "com.iotzontecconfig"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "65ade677-71b9-4c5d-8f2f-f5afeaa2ed71"
+      }
+    }
+  }
+}

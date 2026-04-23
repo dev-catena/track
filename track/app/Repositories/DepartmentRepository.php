@@ -57,8 +57,42 @@ class DepartmentRepository implements DepartmentInterface
             $query->where('organization_id', $filter);
         }
         $department = $query->get();
+        $this->attachTreeDepthToDepartments($department);
 
         return $department;
+    }
+
+    /**
+     * Profundidade na hierarquia (0 = raiz), para indent na listagem.
+     * Usa o mapa id → parent_id de todos os departamentos da(s) mesma(s) org(s) do resultado.
+     */
+    private function attachTreeDepthToDepartments($departments): void
+    {
+        if ($departments->isEmpty()) {
+            return;
+        }
+        $deptIdToParent = [];
+        $orgIds = $departments->pluck('organization_id')->unique()->filter();
+        foreach ($orgIds as $oid) {
+            $rows = Department::where('organization_id', $oid)->get(['id', 'parent_id']);
+            foreach ($rows as $r) {
+                $deptIdToParent[$r->id] = $r->parent_id;
+            }
+        }
+        foreach ($departments as $d) {
+            $depth = 0;
+            $pid = $d->parent_id;
+            $seen = [];
+            while ($pid) {
+                if (in_array($pid, $seen, true)) {
+                    break;
+                }
+                $seen[] = $pid;
+                $depth++;
+                $pid = $deptIdToParent[$pid] ?? null;
+            }
+            $d->setAttribute('tree_depth', $depth);
+        }
     }
 
     // Retrieve specific department details

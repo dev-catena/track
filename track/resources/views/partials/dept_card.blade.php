@@ -1,4 +1,8 @@
-<div class="col-md-4 pb-3 {{ $dept->parent_id ? 'dept-child' : '' }}" style="{{ $dept->parent_id ? 'margin-left: 1.5rem; border-left: 3px solid var(--primary, #0c5389);' : '' }}">
+@php
+    $cardDepth = (int) ($dept->tree_depth ?? ($dept->parent_id ? 1 : 0));
+    $cardPad = $cardDepth * 1.5;
+@endphp
+<div class="col-md-4 pb-3 {{ $cardDepth > 0 ? 'dept-child' : '' }}" style="{{ $cardDepth > 0 ? 'margin-left: ' . $cardPad . 'rem; border-left: 3px solid var(--primary, #0c5389);' : '' }}">
     @if($dept->parent_id)
         <small class="text-muted d-block mb-1"><i class="bi bi-arrow-return-right"></i> Filho de {{ optional($dept->parent)->name ?? '—' }}</small>
     @endif

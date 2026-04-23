@@ -9,6 +9,7 @@ use DB;
 use Illuminate\Support\Facades\Log;
 use App\Repositories\Interfaces\ActivityLogInterface;
 use App\Models\MqttTopic;
+use App\Models\PendingDevice;
 
 class DockRepository implements DockInterface
 {
@@ -28,11 +29,10 @@ class DockRepository implements DockInterface
         ->withCount(['devices','activeAvailableDevices'])
         ->orderBy('id','desc');
 
-        if ($user->role === 'superadmin' && $organizationId) {
-            $query->whereHas('department', function ($q) use ($organizationId) {
-                $q->where('organization_id', $organizationId);
-            });
-        } elseif ($user->role == 'admin') {
+        // Superadmin: listar todas as docas (o seletor global de empresa filtrava por
+        // organization_id e muitas vezes a lista ficava vazia se a org da sidebar
+        // não fosse a do departamento da doca). A coluna "Empresa" mostra a qual pertence.
+        if ($user->role == 'admin') {
             $departmentIds = $user->organization?->departments()->pluck('id');
             $query->whereIn('department_id', $departmentIds ?? []);
         } elseif ($user->role == 'manager') {
@@ -157,6 +157,24 @@ class DockRepository implements DockInterface
                 'created_by'      => $authId,
                 'updated_by'      => $authId,
             ]);
+
+            // Volta a doca ESP para o fluxo de pendentes (o POST /api/devices/pending
+            // só cria/ajusta pendentes; se o pending ficar "activated" sem Dock, a UI quebra
+            $macNorm = str_replace([':', '-', ' '], '', strtolower((string) $dock->dock_number));
+            if (strlen($macNorm) === 12) {
+                $n = PendingDevice::whereRaw(
+                    "REPLACE(REPLACE(REPLACE(LOWER(mac_address), ':', ''), '-', ''), ' ', '') = ?",
+                    [$macNorm]
+                )->update([
+                    'status' => 'pending',
+                    'mqtt_topic_id' => null,
+                    'activated_at' => null,
+                    'activated_by' => null,
+                ]);
+                if ($n > 0) {
+                    Log::info('Exclusão de doca: pending_device reaberto (pending)', ['dock_id' => $id, 'mac' => $macNorm]);
+                }
+            }
 
             $dock->delete();
 

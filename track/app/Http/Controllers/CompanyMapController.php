@@ -46,6 +46,7 @@ class CompanyMapController extends Controller
 
         $query = Organization::with([
             'departments' => fn ($q) => $q->where('status', 'active'),
+            'departments.parent' => fn ($q) => $q,
             'departments.docks' => fn ($q) => $q->with('mqttTopic')->whereNotNull('mqtt_topic_id'),
         ])->where('id', $orgId);
 
@@ -81,16 +82,35 @@ class CompanyMapController extends Controller
             'level' => 0,
         ];
 
-        foreach ($org->departments()->where('status', 'active')->get() as $dept) {
+        $departments = $org->departments()
+            ->where('status', 'active')
+            ->with(['docks' => fn ($q) => $q->with('mqttTopic'), 'parent'])
+            ->get();
+        $deptById = $departments->keyBy('id');
+        $levelByDeptId = [];
+        foreach ($departments as $d) {
+            $levelByDeptId[$d->id] = self::computeDepartmentTreeLevel($d, $deptById);
+        }
+
+        foreach ($departments as $dept) {
+            $lvl = $levelByDeptId[$dept->id] ?? 1;
+            $title = "Departamento: {$dept->name}\nLocal: " . ($dept->location ?? '-');
+            if ($dept->parent_id && $deptById->has($dept->parent_id)) {
+                $parentName = $deptById->get($dept->parent_id)->name ?? '—';
+                $title .= "\nPai: {$parentName}";
+            }
             $nodes[] = [
                 'id' => 'dept-' . $dept->id,
                 'label' => $dept->name,
-                'title' => "Departamento: {$dept->name}\nLocal: " . ($dept->location ?? '-'),
+                'title' => $title,
                 'group' => 'department',
-                'level' => 1,
+                'level' => $lvl,
             ];
-            $edges[] = ['from' => 'org-' . $org->id, 'to' => 'dept-' . $dept->id];
-
+            if ($dept->parent_id && $deptById->has($dept->parent_id)) {
+                $edges[] = ['from' => 'dept-' . $dept->parent_id, 'to' => 'dept-' . $dept->id];
+            } else {
+                $edges[] = ['from' => 'org-' . $org->id, 'to' => 'dept-' . $dept->id];
+            }
             foreach ($dept->docks as $dock) {
                 $dockIds[] = $dock->id;
             }
@@ -116,7 +136,6 @@ class CompanyMapController extends Controller
         $oneHourAgo = Carbon::now()->subHour();
         $twentyFourHoursAgo = Carbon::now()->subHours(24);
 
-        $departments = $org->departments()->where('status', 'active')->with('docks.mqttTopic')->get();
         foreach ($departments as $dept) {
             foreach ($dept->docks as $dock) {
                 if (!$dock->mqtt_topic_id) {
@@ -169,12 +188,14 @@ class CompanyMapController extends Controller
                 $dockTitle .= "Firmware: " . ($firmwareVersion ?? '-') . "\n";
                 $dockTitle .= "Firmware em: " . ($firmwareUpdatedAt ? $firmwareUpdatedAt->format('d/m/Y H:i') : '-');
 
+                $deptLevel = $levelByDeptId[$dept->id] ?? 1;
+
                 $nodes[] = [
                     'id' => 'dock-' . $dock->id,
                     'label' => $dock->name,
                     'title' => $dockTitle,
                     'group' => $connectionGroup,
-                    'level' => 2,
+                    'level' => $deptLevel + 1,
                     'dock_id' => $dock->id,
                     'ip' => $ip,
                     'is_online' => $connectionGroup === 'dock_online',
@@ -453,6 +474,29 @@ class CompanyMapController extends Controller
             'sent' => $sent,
             'failed' => $failed,
         ]);
+    }
+
+    /**
+     * Nível no grafo a partir da raiz (1 = depto direto da empresa, 2 = filho, etc.).
+     */
+    private static function computeDepartmentTreeLevel(Department $dept, $deptById): int
+    {
+        $depth = 0;
+        $cur = $dept;
+        $seen = [];
+        while ($cur && $cur->parent_id) {
+            if (in_array($cur->id, $seen, true)) {
+                return 1;
+            }
+            $seen[] = $cur->id;
+            $p = $deptById->get($cur->parent_id);
+            if (!$p) {
+                break;
+            }
+            $cur = $p;
+            $depth++;
+        }
+        return 1 + $depth;
     }
 
     private static function formatMacForDisplay(?string $mac): string

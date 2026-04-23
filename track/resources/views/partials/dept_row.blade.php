@@ -1,8 +1,12 @@
+@php
+    $treeDepth = (int) ($dept->tree_depth ?? 0);
+    $padRem = $treeDepth > 0 ? $treeDepth * 1.5 : 0;
+@endphp
 <tr>
     <td>
-        @if($dept->parent_id)
-            <span style="padding-left: 1.5rem; border-left: 3px solid var(--primary, #0c5389); display: inline-block;">
-                <i class="bi bi-arrow-return-right text-muted"></i>
+        @if($treeDepth > 0)
+            <span class="d-inline-block" style="padding-left: {{ $padRem }}rem; border-left: 3px solid var(--primary, #0c5389); min-height: 1.25em;">
+                <i class="bi bi-arrow-return-right text-muted" aria-hidden="true"></i>
                 {{ $dept->name }}
             </span>
         @else

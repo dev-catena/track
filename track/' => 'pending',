@@ -1,0 +1,19 @@
+[90m= [39m[34;4mApp\Models\PendingDevice[39;24m {#6745
+    [34mid[39m: [35m1[39m,
+    [34mmac_address[39m: "[32mB0:CB:D8:8B:80:BC[39m",
+    [34mdevice_name[39m: "[32mESP32-Zontec-BC[39m",
+    [34mip_address[39m: "[32m10.102.0.167[39m",
+    [34mwifi_ssid[39m: "[32mCATENA_LAB[39m",
+    [34mstatus[39m: "[32mactivated[39m",
+    [34mregistered_at[39m: [35m2274[39m,
+    [34mdevice_info[39m: "[32m{"info": "ESP32 IoT Zontec v1.0.2"}[39m",
+    [34mfirmware_version[39m: "[32m1.0.2[39m",
+    [34mfirmware_updated_at[39m: "[32m2026-04-23 13:52:25[39m",
+    [34mlast_seen_at[39m: "[32m2026-04-23 13:52:25[39m",
+    [34mactivated_at[39m: "[32m2026-04-23 13:31:59[39m",
+    [34mactivated_by[39m: [35m2[39m,
+    [34mmqtt_topic_id[39m: [35m1[39m,
+    [34mcreated_at[39m: "[32m2026-03-20 03:18:09[39m",
+    [34mupdated_at[39m: "[32m2026-04-23 13:52:25[39m",
+  }
+

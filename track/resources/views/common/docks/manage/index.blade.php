@@ -70,6 +70,11 @@
             </div>
         </div>
 
+        @if ($user->role === 'superadmin')
+            <p class="text-muted small mb-2">
+                Todas as docas de todas as empresas são listadas (use a coluna Empresa e a busca).
+            </p>
+        @endif
         <div class="data_list">
             @include('common.docks.manage.list')
         </div>

@@ -127,17 +127,23 @@ class PendingDeviceWebController extends Controller
 
     private function getDepartmentsForUser($user)
     {
-        $query = Department::select('id', 'name', 'organization_id')
-            ->where('status', 'active')
-            ->orderBy('name');
-
         if ($user->role === 'admin') {
-            $query->where('organization_id', $user->organization_id);
-        } elseif ($user->role === 'manager') {
-            $query->where('id', $user->department_id);
+            return Department::forSelectHierarchical((int) $user->organization_id)
+                ->map(fn (array $row) => (object) $row);
         }
-
-        return $query->get();
+        if ($user->role === 'manager' && $user->department_id) {
+            $d = Department::query()
+                ->where('id', $user->department_id)
+                ->where('status', 'active')
+                ->first(['id', 'name']);
+            if ($d) {
+                return collect([(object) ['id' => $d->id, 'name' => $d->name, 'depth' => 0]]);
+            }
+        }
+        if ($user->role === 'superadmin') {
+            return collect();
+        }
+        return collect();
     }
 
     private function getOrganizationsForUser($user)

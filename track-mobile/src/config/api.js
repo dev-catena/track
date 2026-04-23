@@ -8,7 +8,7 @@
  * Opcional: defina EXPO_PUBLIC_API_BASE_URL no .env na raiz do Expo (reiniciar com -c).
  *
  * Exemplos:
- * - Rede local (servidor Track + Expo nesta máquina): http://10.102.0.115:8000
+ * - Rede local (servidor Track + Expo nesta máquina): http://10.102.0.103:8000
  * - Emulador Android: http://10.0.2.2:8000
  * - iOS Simulator: http://localhost:8000
  */
@@ -18,5 +18,5 @@ const envBase =
     : '';
 
 export const API_CONFIG = {
-  BASE_URL: envBase || 'http://10.102.0.115:8000',
+  BASE_URL: envBase || 'http://10.102.0.103:8000',
 };

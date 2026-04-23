@@ -18,7 +18,7 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
   } catch (e) {
     if (e?.name === 'AbortError') {
       throw new Error(
-        'Tempo esgotado ao falar com o servidor Track. Confira: (1) em config/api.js a URL é do Laravel (IP:porta), não face.thalamus.ind.br; (2) celular e PC na mesma rede; (3) servidor rodando (ex.: php artisan serve).'
+        `Tempo esgotado ao falar com o Track em ${BASE_URL}. Ajuste EXPO_PUBLIC_API_BASE_URL (arquivo .env) ou config/api.js para o IP:porta do PC onde o Laravel roda, na mesma rede do celular. Servidor: php artisan serve --host=0.0.0.0 --port=8000`
       );
     }
     throw e;
@@ -84,12 +84,23 @@ export const api = {
     }
     formData.append('password', password);
 
-    const res = await fetch(`${BASE_URL}/api/auth/admin/login`, {
-      method: 'POST',
-      headers: { Accept: 'application/json' },
-      body: formData,
-    });
-    const data = await res.json();
+    const res = await fetchWithTimeout(
+      `${BASE_URL}/api/auth/admin/login`,
+      {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: formData,
+      },
+      30000
+    );
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error(
+        `Resposta inválida (HTTP ${res.status}). API base: ${BASE_URL} — confira se o Laravel está acessível no celular (mesma WiFi, firewall).`
+      );
+    }
     if (data.status === 0) throw new Error(data.message || 'Login falhou');
     return data;
   },
