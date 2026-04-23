@@ -1,0 +1,248 @@
+/**
+ * Tema Octus para Track
+ * Paleta: tons de cinza azulado (#536173)
+ * Fonte: Inter (como Octus)
+ */
+
+@import url('https://fonts.bunny.net/css?family=inter:400,500,600,700');
+
+:root {
+  --octus-primary: #536173;
+  --octus-primary-light: #6b7a8a;
+  --octus-primary-dark: #404B59;
+  --octus-primary-darker: #2d3440;
+  --octus-primary-lightest: #8a9ba8;
+}
+
+/* Override primary colors */
+.white-content .btn-primary,
+.white-content .bg-primary,
+.white-content .badge-primary,
+.white-content .sidebar .nav .active a,
+.white-content .sidebar .nav a:hover,
+.white-content .navbar .btn-primary {
+  background-color: var(--octus-primary) !important;
+  border-color: var(--octus-primary) !important;
+}
+
+.white-content .btn-primary:hover,
+.white-content .sidebar .nav a:hover {
+  background-color: var(--octus-primary-dark) !important;
+  border-color: var(--octus-primary-dark) !important;
+}
+
+.white-content .card-icon i,
+.white-content .heading_title,
+.white-content .nav .active p,
+.white-content .nav .active i {
+  color: var(--octus-primary) !important;
+}
+
+/* DataTables pagination */
+.white-content .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.white-content .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background-color: var(--octus-primary) !important;
+  border-color: var(--octus-primary) !important;
+}
+
+/* Sidebar - tema claro: fundo claro com bordas sutis */
+.white-content .sidebar {
+  background: #f8f9fa !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04) !important;
+}
+
+.white-content .sidebar .sidebar-wrapper,
+.white-content .sidebar .nav {
+  background: transparent !important;
+}
+
+.white-content .sidebar .nav a,
+.white-content .sidebar h3,
+.white-content .sidebar .nav p {
+  color: var(--octus-primary-dark) !important;
+}
+
+.white-content .sidebar .nav .active a,
+.white-content .sidebar .nav .active p,
+.white-content .sidebar .nav .active i {
+  color: #fff !important;
+  background: var(--octus-primary) !important;
+}
+
+.white-content .sidebar .nav a:hover {
+  background: rgba(83, 97, 115, 0.08) !important;
+  color: var(--octus-primary-darker) !important;
+}
+
+.white-content .sidebar .nav .active a:hover {
+  color: #fff !important;
+}
+
+.white-content .sidebar hr {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Seletor de empresa na sidebar - tema claro */
+.white-content .sidebar #global-org-select {
+  background: #fff !important;
+  color: var(--octus-primary-dark) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Navbar */
+.white-content .navbar {
+  background: #fff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.white-content .navbar .navbar-brand,
+.white-content .navbar .nav-link {
+  color: var(--octus-primary-dark) !important;
+}
+
+/* Typography - Inter font */
+body.white-content,
+.white-content .main-panel,
+.white-content h1, .white-content h2, .white-content h3,
+.white-content .heading_title {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+/* Brand/Logo area */
+.white-content .sidebar .sidebar-wrapper h3 {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* ===== MELHORIAS TEMA CLARO ===== */
+
+/* Área principal - fundo suave para contraste */
+.white-content .main-panel {
+  background: #f0f2f5 !important;
+}
+
+/* Cards - bordas visíveis e sombra suave */
+.white-content .card:not(.card-white) {
+  background: #fff !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+}
+
+.white-content .card .card-header {
+  background: #fafbfc !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: var(--octus-primary-dark) !important;
+}
+
+.white-content .card .card-body {
+  color: #374151 !important;
+}
+
+/* Formulários - inputs mais legíveis */
+.white-content .form-control {
+  background: #fff !important;
+  border: 1px solid #d1d5db !important;
+  color: #1f2937 !important;
+}
+
+.white-content .form-control:focus {
+  border-color: var(--octus-primary) !important;
+  box-shadow: 0 0 0 3px rgba(83, 97, 115, 0.15) !important;
+}
+
+.white-content .form-control::placeholder {
+  color: #9ca3af !important;
+}
+
+.white-content label {
+  color: #374151 !important;
+}
+
+/* Select - tema claro */
+.white-content .select-control {
+  background-color: #fff !important;
+  border: 1px solid #d1d5db !important;
+  color: #1f2937 !important;
+}
+
+/* User/Dept cards - fundo e bordas */
+.white-content #table-data .card,
+.white-content .card-user,
+.white-content .dept-card {
+  background: #fff !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* DataTables - paginação e controles */
+.white-content .dataTables_wrapper {
+  color: #374151 !important;
+}
+
+.white-content .dataTables_wrapper .dataTables_info {
+  color: #6b7280 !important;
+}
+
+.white-content .dataTables_wrapper .dataTables_filter input {
+  border: 1px solid #d1d5db !important;
+  background: #fff !important;
+}
+
+/* Dashboard cards - contraste */
+.white-content .content .card .card-body {
+  color: #374151 !important;
+}
+
+.white-content .content .card .card-body .display-2 {
+  color: var(--octus-primary-dark) !important;
+}
+
+.white-content .content .card .card-body p {
+  color: #6b7280 !important;
+}
+
+/* Navbar - refinamento */
+.white-content .navbar {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Dropdown - legibilidade no tema claro */
+.white-content .dropdown-menu {
+  background: #fff !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.white-content .dropdown-item {
+  color: #374151 !important;
+}
+
+.white-content .dropdown-item:hover {
+  background: #f3f4f6 !important;
+}
+
+/* Cards aninhados (ex: dept dock/device count) */
+.white-content .card .card .card-body {
+  background: #f9fafb !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Títulos e ícones nos cards */
+.white-content .card .card-header h3,
+.white-content .card .card-header .title {
+  color: var(--octus-primary-dark) !important;
+}
+
+.white-content .card .card-header p,
+.white-content .card .card-body p {
+  color: #4b5563 !important;
+}
+
+/* Botão dropdown nos cards */
+.white-content .btn-link.dropdown-toggle {
+  color: #6b7280 !important;
+}
+
+.white-content .btn-link.dropdown-toggle:hover {
+  color: var(--octus-primary) !important;
+}

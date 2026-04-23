@@ -1,0 +1,6 @@
+# Editor / local
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.cursor/

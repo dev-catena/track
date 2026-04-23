@@ -1,0 +1,167 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    background: #3E4A59;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-card {
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 8px;
+}
+
+.login-header p {
+    color: #718096;
+    font-size: 14px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s;
+    outline: none;
+}
+
+.form-input:focus {
+    border-color: #3E4A59;
+    box-shadow: 0 0 0 3px rgba(62, 74, 89, 0.1);
+}
+
+.form-input.border-red-500 {
+    border-color: #f56565;
+}
+
+.login-button {
+    width: 100%;
+    padding: 14px;
+    background: #3E4A59;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.login-button:hover {
+    background: #2d3642;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(62, 74, 89, 0.3);
+}
+
+.login-button:active {
+    transform: translateY(0);
+}
+
+.bg-red-100 {
+    background-color: #fff5f5;
+    border: 1px solid #fc8181;
+    color: #c53030;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.list-disc {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.text-red-500 {
+    color: #f56565;
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+}
+
+.text-gray-500 {
+    color: #718096;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-sm {
+    font-size: 14px;
+}
+
+.mt-8 {
+    margin-top: 32px;
+}
+
+.relative {
+    position: relative;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.right-3 {
+    right: 12px;
+}
+
+.top-1\/2 {
+    top: 50%;
+}
+
+.transform {
+    transform: translateY(-50%);
+}
+
+.pr-12 {
+    padding-right: 48px;
+}
+
+button[type="button"] {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+}
+

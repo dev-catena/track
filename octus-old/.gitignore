@@ -1,0 +1,127 @@
+# ╔════════════════════════════════════════════════════╗
+# ║   GITIGNORE - OCTUS IOT                            ║
+# ╚════════════════════════════════════════════════════╝
+
+# ============================================
+# ARQUIVOS DE CONFIGURAÇÃO SENSÍVEIS
+# ============================================
+.env
+.env.*
+!.env.example
+*.env
+config/environment.*.env
+
+# Senhas e segredos
+*password*
+*secret*
+*secrets*
+.octus-secrets
+
+# ============================================
+# DEPENDÊNCIAS
+# ============================================
+vendor/
+node_modules/
+composer.phar
+package-lock.json
+yarn.lock
+
+# ============================================
+# CACHE E COMPILADOS
+# ============================================
+bootstrap/cache/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+*.log
+
+# Laravel Mix
+public/hot
+public/storage
+public/css/app.css
+public/js/app.js
+public/mix-manifest.json
+
+# ============================================
+# BACKUPS
+# ============================================
+backups/
+*.sql
+*.sql.gz
+*.backup
+*.bak
+
+# ============================================
+# IDE E EDITORES
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ============================================
+# BUILDS E COMPILADOS
+# ============================================
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.app
+
+# ESP32 / PlatformIO
+.pio/
+.vscode/
+esp32-octus-platformio/.pio/
+esp32-octus-platformio/lib/
+esp32-octus-platformio/include/
+
+# Arduino
+*.hex
+*.bin
+*.elf
+
+# ============================================
+# ARQUIVOS TEMPORÁRIOS
+# ============================================
+*.tmp
+*.temp
+.tmp/
+.cache/
+
+# ============================================
+# SCRIPTS DE DEPLOY (OPCIONAL)
+# ============================================
+# Descomente se não quiser versionar os scripts de deploy:
+# deploy-*.sh
+# *.sh
+
+# ============================================
+# DOCUMENTAÇÃO GERADA
+# ============================================
+# Descomente se não quiser versionar documentação:
+# *.md
+# !README.md
+
+# ============================================
+# ARQUIVOS ESPECÍFICOS DE PRODUÇÃO
+# ============================================
+*.production.*
+production/
+
+# ============================================
+# OUTROS
+# ============================================
+*.pid
+*.sock
+*.lock
+!composer.lock
+!package.json

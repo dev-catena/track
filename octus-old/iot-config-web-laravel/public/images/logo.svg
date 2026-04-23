@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Octopus Logo -->
+  <g fill="#3E4A59">
+    <!-- Head/Body -->
+    <circle cx="256" cy="200" r="80"/>
+    
+    <!-- Tentacles -->
+    <path d="M 200 240 Q 180 280 160 320 Q 140 360 150 400 C 155 420 165 430 180 420"/>
+    <path d="M 220 250 Q 210 290 200 330 Q 190 370 195 410 C 198 430 208 440 220 430"/>
+    <path d="M 256 260 Q 256 300 256 340 Q 256 380 260 420 C 262 440 272 450 284 440"/>
+    <path d="M 292 250 Q 302 290 312 330 Q 322 370 317 410 C 314 430 304 440 292 430"/>
+    <path d="M 312 240 Q 332 280 352 320 Q 372 360 362 400 C 357 420 347 430 332 420"/>
+  </g>
+  
+  <!-- Text "octus" -->
+  <text x="420" y="300" font-family="'Inter', 'Helvetica', 'Arial', sans-serif" font-size="180" font-weight="500" fill="#3E4A59">octus</text>
+</svg>
+

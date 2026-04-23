@@ -1,0 +1,455 @@
+.white-content .bg-primary,
+.white-content .bg-primary h1,
+.white-content .bg-primary h2,
+.white-content .bg-primary h3,
+.white-content .bg-primary h4,
+.white-content .bg-primary h5,
+.white-content .bg-primary h6,
+.white-content .bg-primary p,
+.white-content .bg-primary a,
+.white-content #table-data .badge-primary
+{
+    color: #fff !important;
+}
+
+
+
+.cursor-pointer {
+    cursor: pointer;
+}
+.required,.error {
+    color: #fd5d93;
+}
+
+/* .dark-content select {
+    background: #27293d !important;
+} */
+
+.select-control {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 5.5l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2rem;
+}
+.dark-content .select-control {
+    background-color: #27293d ;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23ffffff' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 5.5l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.white-content .select-control {
+    background-color: #fff !important;
+    border: 1px solid #d1d5db !important;
+    color: #1f2937 !important;
+}
+
+.card-icon i{
+    right: 15px;
+    top: 30%;
+    color: rgba(255, 255, 255, 0.8);;
+
+}
+.white-content .card-icon i {
+    color: #0c5389;
+}
+.display-5 {
+    font-size: 1rem;
+    font-weight: 600;
+
+}
+i.text-warning {
+    --bs-text-opacity: 1;
+    color: rgba(var(--bs-warning-rgb), var(--bs-text-opacity)) !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background-color: #0c5389 !important;
+    border-color: #0c5389 !important;
+    color: #fff !important;
+}
+
+#loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    align-items: center;
+    display: none;
+    justify-content: center;
+}
+
+.card-primary,.btn-primary,.bg-primary,.badge-primary {
+    background: #0c5389 !important;
+}
+.dark-content .border-primary {
+    border-color: #2b3553;
+}
+
+.custom-scroll {
+    overflow-x: auto;
+    position: relative;
+    /* Needed for absolute positioning in thumb style */
+}
+
+/* For Chrome, Safari, Edge */
+.custom-scroll::-webkit-scrollbar {
+    height: 8px;
+    /* height for horizontal scrollbar */
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: transparent;
+    /* background behind thumb */
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background-color: #aaa;
+    border-radius: 6px;
+    transition: background-color .2s linear, width .2s ease-in-out;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: #888;
+    width: 10px;
+    /* expands on hover */
+}
+
+/* For Firefox */
+.custom-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #aaa transparent;
+}
+
+.white-content .sidebar-wrapper ul.nav li a.open p,
+.white-content .sidebar-wrapper ul.nav li a.open i,
+.white-content .sidebar-wrapper ul.nav li a.active p,
+.white-content .sidebar-wrapper ul.nav li a.active i {
+    color: #fff;
+}
+
+/* Margem direita dos itens do menu em relação ao sidebar-wrapper */
+.sidebar .sidebar-wrapper {
+    padding-right: 12px !important;
+}
+
+/* Navegação sem barras de rolagem - sidebar e main-panel */
+.sidebar,
+.sidebar .sidebar-wrapper,
+.main-panel,
+.wrapper {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.sidebar::-webkit-scrollbar,
+.sidebar .sidebar-wrapper::-webkit-scrollbar,
+.main-panel::-webkit-scrollbar,
+.wrapper::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+    width: 0;
+    height: 0;
+}
+
+/* Ocultar barras do Perfect Scrollbar (usado no Windows) */
+.ps__rail-x,
+.ps__rail-y {
+    display: none !important;
+}
+
+/* Ocultar barras na tabela de usuários, DataTables e áreas de conteúdo */
+.user-table-wrapper,
+.user-table-wrapper .table-responsive,
+.dataTables_wrapper,
+.dataTables_wrapper .dataTables_scroll,
+.dataTables_wrapper .dataTables_scrollHead,
+.dataTables_wrapper .dataTables_scrollBody,
+.dataTables_wrapper .dataTables_scrollFoot,
+.table-responsive,
+.main-panel .content {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.user-table-wrapper::-webkit-scrollbar,
+.user-table-wrapper .table-responsive::-webkit-scrollbar,
+.dataTables_wrapper::-webkit-scrollbar,
+.dataTables_wrapper *::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar,
+.main-panel .content::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* Ocultar scrollbars em elementos do layout principal */
+body,
+html,
+.content,
+.card,
+.card-body {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+body::-webkit-scrollbar,
+html::-webkit-scrollbar,
+.content::-webkit-scrollbar,
+.card::-webkit-scrollbar,
+.card-body::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+.bg-warning-opacity {
+    background: #c0c05870 !important;
+}
+.bg-success-opacity {
+    background: #75d8bc70 !important;
+}
+.bg-danger-opacity {
+    background: #e39ab25e !important;
+}
+
+.bg-primary-opacity {
+    background: #5180a38c !important;
+}
+.bg-info-opacity {
+    background: #78b6eb70 !important;
+}
+.dock-slot .col {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+}
+.dock-slot .card-body{
+    padding: 5px !important;
+}
+.dock-slot p {
+    font-size: 0.620rem;
+    font-weight: 600;
+}
+.text-primary {
+    color: #0c5389 !important
+}
+
+.dock-slot .card {
+    margin-bottom: 0px;
+    border: 2px solid;
+}
+
+.dock-slot h3 {
+    font-size: 14px;
+    margin-bottom: 0px !important;
+}
+
+.dock-slot .card-body {
+    padding: 20px 4px !important;
+}
+
+.dock-slot p {
+    margin-bottom: 0px;
+    font-weight: 600;
+}
+
+.dock-slot h3.text-warning {
+    color: #585858 !important;
+}
+
+.dock-slot .card-body.text-warning i, .dock-slot .card-body.text-warning p{
+    color: #585858 !important;
+}
+.dock-slot h3.text-warning {
+    color: #585858 !important;
+}
+
+.dock-slot .card-body.text-warning i, .dock-slot .card-body.text-warning p{
+    color: #585858 !important;
+}
+
+.dock-slot h3.text-warning {
+    color: #585858 !important;
+}
+
+.dark-content .dock-slot .card-body i,
+.dark-content .dock-slot .card-body h3,
+.dark-content .dock-slot .card-body p {
+    color: #fff !important;
+}
+
+h1 {
+    font-size: 1.915rem !important;
+}
+html,
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    /* Extra horizontal scroll prevent */
+}
+@media screen and (max-width: 382px) {
+    .navbar .container-fluid {
+        padding-left: 10px !important;
+    }
+}
+
+.white-content .navbar .navbar-toggler-bar {
+    background: #000 !important;
+}
+.navbar .navbar-toggle button:focus,
+.navbar .navbar-toggler {
+    box-shadow: none !important;
+}
+
+.content {
+    margin-top: 1rem !important;
+}
+.skiptranslate {
+    display: none !important;
+}
+
+
+.card_title_overflow {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* Tabela Docas Pendentes - fundo escuro forçado (override white-content) */
+.pending-devices-table-wrapper,
+.pending-devices-table-wrapper.card-body,
+.pending-devices-table-wrapper .card-body,
+.pending-devices-table-wrapper table,
+.pending-devices-table-wrapper table thead,
+.pending-devices-table-wrapper table tbody,
+.pending-devices-table-wrapper table tr,
+.pending-devices-table-wrapper table th,
+.pending-devices-table-wrapper table td,
+.white-content .pending-devices-table-wrapper,
+.white-content .pending-devices-table-wrapper.card-body,
+.white-content .pending-devices-table-wrapper table,
+.white-content .pending-devices-table-wrapper table thead,
+.white-content .pending-devices-table-wrapper table tbody,
+.white-content .pending-devices-table-wrapper table tr,
+.white-content .pending-devices-table-wrapper table th,
+.white-content .pending-devices-table-wrapper table td {
+    background-color: #27293d !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+.pending-devices-table-wrapper table code,
+.white-content .pending-devices-table-wrapper table code {
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+.pending-devices-table-wrapper table th,
+.pending-devices-table-wrapper table td,
+.white-content .pending-devices-table-wrapper table th,
+.white-content .pending-devices-table-wrapper table td {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Tabela Permissões - fundo escuro forçado */
+.permissions-table-wrapper,
+.permissions-table-wrapper .card-body,
+.permissions-table-wrapper .permission-table,
+.permissions-table-wrapper .permission-table thead,
+.permissions-table-wrapper .permission-table tbody,
+.permissions-table-wrapper .permission-table tr,
+.permissions-table-wrapper .permission-table th,
+.permissions-table-wrapper .permission-table td,
+.white-content .permissions-table-wrapper .permission-table th,
+.white-content .permissions-table-wrapper .permission-table td {
+    background-color: #27293d !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Tabela de Departamentos - tema dark (igual às demais tabelas do sistema) */
+.dept-table-wrapper,
+.dept-table-wrapper table,
+.dept-table-wrapper thead,
+.dept-table-wrapper tbody,
+.dept-table-wrapper th,
+.dept-table-wrapper td,
+.white-content .dept-table-wrapper,
+.white-content .dept-table-wrapper table,
+.white-content .dept-table-wrapper thead,
+.white-content .dept-table-wrapper tbody,
+.white-content .dept-table-wrapper th,
+.white-content .dept-table-wrapper td {
+    background-color: #27293d !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.dept-table-wrapper .text-muted,
+.white-content .dept-table-wrapper .text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.dept-table-wrapper .btn-link,
+.white-content .dept-table-wrapper .btn-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.dept-table-wrapper .btn-link:hover,
+.white-content .dept-table-wrapper .btn-link:hover {
+    color: rgba(255, 255, 255, 1) !important;
+}
+
+/* Tabela de Usuários - fundo e texto com contraste */
+.user-table-wrapper,
+.user-table-wrapper table,
+.user-table-wrapper #user-table,
+.user-table-wrapper #user-table thead,
+.user-table-wrapper #user-table tbody,
+.user-table-wrapper #user-table tr,
+.user-table-wrapper #user-table th,
+.user-table-wrapper #user-table td,
+.white-content .user-table-wrapper,
+.white-content .user-table-wrapper table,
+.white-content .user-table-wrapper #user-table,
+.white-content .user-table-wrapper #user-table thead,
+.white-content .user-table-wrapper #user-table tbody,
+.white-content .user-table-wrapper #user-table tr,
+.white-content .user-table-wrapper #user-table th,
+.white-content .user-table-wrapper #user-table td {
+    background-color: #27293d !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.user-table-wrapper .btn-link,
+.white-content .user-table-wrapper .btn-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.user-table-wrapper .btn-link:hover,
+.white-content .user-table-wrapper .btn-link:hover {
+    color: rgba(255, 255, 255, 1) !important;
+}
+
+/* Tema claro: tabela de usuários com fundo claro e texto escuro */
+.white-content .user-table-wrapper,
+.white-content .user-table-wrapper table,
+.white-content .user-table-wrapper #user-table,
+.white-content .user-table-wrapper #user-table thead,
+.white-content .user-table-wrapper #user-table tbody,
+.white-content .user-table-wrapper #user-table tr,
+.white-content .user-table-wrapper #user-table th,
+.white-content .user-table-wrapper #user-table td {
+    background-color: #fff !important;
+    color: #374151 !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.white-content .user-table-wrapper .btn-link {
+    color: #6b7280 !important;
+}
+
+.white-content .user-table-wrapper .btn-link:hover {
+    color: #1f2937 !important;
+}

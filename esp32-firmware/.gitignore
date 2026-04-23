@@ -1,0 +1,14 @@
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+.vscode/
+
+# Firmware alternativo (apenas main.cpp deve estar em src/)
+src/main_development.cpp
+src/main_production.cpp
+src/main_with_ota.cpp
+
+# Mantém backup_src/ local apenas
+backup_src/
+

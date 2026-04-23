@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Debug localStorage - ESP32 MAC</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .debug-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #059669;
+        }
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 0.5rem 0;
+            white-space: pre-wrap;
+        }
+        .success { border-left: 4px solid #10b981; }
+        .error { border-left: 4px solid #ef4444; }
+        .warning { border-left: 4px solid #f59e0b; }
+        input {
+            width: 300px;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug localStorage - ESP32 MAC Address</h1>
+    
+    <div class="debug-box">
+        <h3>📋 Status Atual do localStorage</h3>
+        <button onclick="checkCurrentStatus()">🔍 Verificar Status</button>
+        <div id="current-status" class="result"></div>
+    </div>
+
+    <div class="debug-box">
+        <h3>🧪 Testes Manuais</h3>
+        <button onclick="setTestMAC()">🧪 Definir MAC Teste</button>
+        <button onclick="clearMAC()">🗑️ Limpar MAC</button>
+        <button onclick="setCustomMAC()">✏️ Definir MAC Personalizado</button>
+        <input type="text" id="custom-mac" placeholder="AA:BB:CC:DD:EE:FF" pattern="^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$">
+        <div id="test-results" class="result"></div>
+    </div>
+
+    <div class="debug-box">
+        <h3>🌐 Teste do Aplicativo</h3>
+        <button onclick="testAppIntegration()">🚀 Testar no App</button>
+        <div id="app-test" class="result"></div>
+    </div>
+
+    <div class="debug-box">
+        <h3>🔬 Informações do Navegador</h3>
+        <button onclick="showBrowserInfo()">📱 Info do Navegador</button>
+        <div id="browser-info" class="result"></div>
+    </div>
+
+    <div class="debug-box">
+        <h3>📜 Histórico de Ações</h3>
+        <button onclick="clearLog()">🗑️ Limpar Log</button>
+        <div id="action-log" class="result"></div>
+    </div>
+
+    <script>
+        let actionLog = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = `[${timestamp}] ${message}`;
+            actionLog.push(entry);
+            
+            console.log(entry);
+            updateActionLog();
+            
+            // Também mostrar no console do navegador
+            if (type === 'error') {
+                console.error(entry);
+            } else if (type === 'warning') {
+                console.warn(entry);
+            } else {
+                console.log(entry);
+            }
+        }
+
+        function updateActionLog() {
+            document.getElementById('action-log').textContent = actionLog.slice(-10).join('\n');
+        }
+
+        function checkCurrentStatus() {
+            log('🔍 Verificando status atual do localStorage...');
+            
+            const mac = localStorage.getItem('esp32_mac_address');
+            const allKeys = Object.keys(localStorage);
+            const localStorageSize = new Blob(Object.values(localStorage)).size;
+            
+            let status = `📱 MAC Address ESP32: ${mac || 'NÃO ENCONTRADO'}\n`;
+            status += `🔑 Total de chaves no localStorage: ${allKeys.length}\n`;
+            status += `📦 Tamanho do localStorage: ${localStorageSize} bytes\n\n`;
+            status += `🗂️ Todas as chaves:\n${allKeys.join(', ') || 'Nenhuma'}\n\n`;
+            
+            if (mac) {
+                status += `✅ STATUS: MAC encontrado\n`;
+                status += `📐 Comprimento: ${mac.length} caracteres\n`;
+                status += `🔤 Formato válido: ${/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test(mac) ? 'SIM' : 'NÃO'}\n`;
+                
+                document.getElementById('current-status').className = 'result success';
+                log(`✅ MAC encontrado: ${mac}`, 'info');
+            } else {
+                status += `❌ STATUS: MAC NÃO ENCONTRADO\n`;
+                status += `💡 O ESP32 precisa salvar o MAC no captive portal\n`;
+                
+                document.getElementById('current-status').className = 'result error';
+                log('❌ MAC não encontrado no localStorage', 'error');
+            }
+            
+            document.getElementById('current-status').textContent = status;
+        }
+
+        function setTestMAC() {
+            const testMAC = 'AA:BB:CC:DD:EE:FF';
+            localStorage.setItem('esp32_mac_address', testMAC);
+            
+            log(`🧪 MAC de teste definido: ${testMAC}`);
+            
+            // Verificar se foi salvo
+            const saved = localStorage.getItem('esp32_mac_address');
+            if (saved === testMAC) {
+                document.getElementById('test-results').textContent = `✅ MAC de teste salvo com sucesso: ${saved}`;
+                document.getElementById('test-results').className = 'result success';
+                log('✅ MAC de teste salvo com sucesso');
+            } else {
+                document.getElementById('test-results').textContent = `❌ Erro ao salvar MAC de teste`;
+                document.getElementById('test-results').className = 'result error';
+                log('❌ Erro ao salvar MAC de teste', 'error');
+            }
+        }
+
+        function clearMAC() {
+            localStorage.removeItem('esp32_mac_address');
+            log('🗑️ MAC removido do localStorage');
+            
+            document.getElementById('test-results').textContent = '🗑️ MAC removido do localStorage';
+            document.getElementById('test-results').className = 'result warning';
+        }
+
+        function setCustomMAC() {
+            const customMAC = document.getElementById('custom-mac').value.trim();
+            
+            if (!customMAC) {
+                alert('Digite um MAC address primeiro!');
+                return;
+            }
+            
+            if (!/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test(customMAC)) {
+                alert('Formato de MAC inválido! Use o formato: AA:BB:CC:DD:EE:FF');
+                return;
+            }
+            
+            localStorage.setItem('esp32_mac_address', customMAC);
+            log(`✏️ MAC personalizado definido: ${customMAC}`);
+            
+            document.getElementById('test-results').textContent = `✅ MAC personalizado salvo: ${customMAC}`;
+            document.getElementById('test-results').className = 'result success';
+        }
+
+        function testAppIntegration() {
+            const mac = localStorage.getItem('esp32_mac_address');
+            
+            if (!mac) {
+                document.getElementById('app-test').textContent = '❌ Nenhum MAC encontrado para testar';
+                document.getElementById('app-test').className = 'result error';
+                log('❌ Teste do app falhou - nenhum MAC encontrado', 'error');
+                return;
+            }
+            
+            log(`🚀 Testando integração com o app usando MAC: ${mac}`);
+            
+            // Simular o que o app faz
+            let result = `🚀 Simulação da integração com o app:\n\n`;
+            result += `1. ✅ MAC encontrado no localStorage: ${mac}\n`;
+            result += `2. ✅ Formato válido: ${/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test(mac) ? 'SIM' : 'NÃO'}\n`;
+            result += `3. ✅ Campo hidden seria populado\n`;
+            result += `4. ✅ Seção "Dispositivo Detectado" seria mostrada\n`;
+            result += `5. ✅ Formulário seria habilitado\n\n`;
+            result += `🎯 RESULTADO: O app deveria funcionar corretamente!`;
+            
+            document.getElementById('app-test').textContent = result;
+            document.getElementById('app-test').className = 'result success';
+            log('✅ Teste de integração com app passou');
+        }
+
+        function showBrowserInfo() {
+            let info = `🌐 Informações do Navegador:\n\n`;
+            info += `User Agent: ${navigator.userAgent}\n`;
+            info += `Plataforma: ${navigator.platform}\n`;
+            info += `Língua: ${navigator.language}\n`;
+            info += `Cookies habilitados: ${navigator.cookieEnabled ? 'SIM' : 'NÃO'}\n`;
+            info += `localStorage disponível: ${typeof(Storage) !== "undefined" ? 'SIM' : 'NÃO'}\n`;
+            info += `URL atual: ${window.location.href}\n`;
+            info += `Protocolo: ${window.location.protocol}\n`;
+            info += `Host: ${window.location.host}\n`;
+            
+            document.getElementById('browser-info').textContent = info;
+            document.getElementById('browser-info').className = 'result';
+            log('📱 Informações do navegador exibidas');
+        }
+
+        function clearLog() {
+            actionLog = [];
+            updateActionLog();
+            log('🗑️ Log de ações limpo');
+        }
+
+        // Inicialização
+        window.onload = function() {
+            log('🔧 Debug localStorage iniciado');
+            checkCurrentStatus();
+        };
+    </script>
+</body>
+</html> 
